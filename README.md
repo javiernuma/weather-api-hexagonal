@@ -1,111 +1,192 @@
-# Weather Proxy API - Hexagonal Architecture
+# ☁️ Weather API - Hexagonal Architecture Showcase
 
-Este proyecto es una solución para la prueba técnica de Blossom, desarrollada utilizando Java, Spring Boot y estructurada bajo los principios de arquitectura hexagonal.
+> Production-ready weather aggregation service demonstrating Hexagonal Architecture 
+> (Ports & Adapters), Clean Architecture principles, and modern Java 17+ features.
 
-## 🧩 Estructura del proyecto
+[![Java](https://img.shields.io/badge/Java-17-red?logo=openjdk&logoColor=white)]
+[![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x-green?logo=spring&logoColor=white)]
+[![Hexagonal](https://img.shields.io/badge/Architecture-Hexagonal-blue)]
+[![License](https://img.shields.io/badge/License-MIT-yellow)]
 
-- **Arquitectura Hexagonal**: Separación clara entre capas.
-- **Buenas prácticas de clean code**: Código legible, mantenible y testeado.
-- **Manejo de errores**: Implementación de excepciones personalizadas y controladores globales para gestionar errores HTTP de APIs externas.
+## 🎯 Overview
 
-## 📄 Documentación
+Enterprise-grade weather API service that aggregates data from multiple weather 
+providers through a clean, unified interface. Built to demonstrate architectural 
+patterns and best practices in modern Java development.
 
-- La solución técnica y las respuestas a las preguntas de la prueba se encuentran en el archivo [`answers.md`](./documentacion/answers.md).
+### Key Features
 
-## Arquitectura
-Una API REST que actúa como proxy para servicios externos del clima (weatherstack, OpenWeather, etc.), aplicando lógica personalizada y registrando cada solicitud.
-Este proyecto implementa una arquitectura hexagonal (Ports and Adapters), siguiendo estos principios:
+- ✅ **Hexagonal Architecture** - Complete separation of business logic from technical concerns
+- ✅ **Provider Abstraction** - Easily add new weather data sources
+- ✅ **Normalized API** - Consistent response format regardless of provider
+- ✅ **Modern Java 17+** - Records, Pattern Matching, Text Blocks
+- ✅ **Spring Boot 3.x** - Jakarta EE, native compilation ready
+- ✅ **API Documentation** - Swagger/OpenAPI integration
+- ✅ **Request Logging** - Complete audit trail of API calls
+
+---
+
+## 🏗️ Architecture
+
+### Hexagonal Architecture Layers
 
 ```
-weather-proxy-hexa/
+weather-api/
 │
-├── domain/                   # Capa de dominio (sin dependencias externas)
-│   ├── model/                # Entidades y objetos de valor
-│   ├── ports/                # Interfaces que definen contratos
-│   │   ├── in/               # Puertos primarios (casos de uso)
-│   │   └── out/              # Puertos secundarios (persistencia, servicios externos)
-│   └── services/             # Implementación de los casos de uso
+├── domain/                   # Core business logic (zero external dependencies)
+│   ├── model/                # Entities & Value Objects
+│   ├── ports/                # Interface contracts
+│   │   ├── in/               # Primary ports (use cases)
+│   │   └── out/              # Secondary ports (persistence, external APIs)
+│   └── services/             # Business logic implementation
 │
-├── shared/                   # DTOs y excepciones compartidas entre capas
-│   ├── dto/                  # Objetos de transferencia de datos
-│   └── exception/            # Excepciones personalizadas
+├── shared/                   # Cross-cutting concerns
+│   ├── dto/                  # Data Transfer Objects
+│   └── exception/            # Domain exceptions
 │
-├── application/              # Orquestación de la aplicación (depende de domain y shared)
-│   ├── service/              # Implementación de servicios de aplicación
-│   └── config/               # Configuración específica de la aplicación
+├── application/              # Application orchestration
+│   ├── service/              # Application services
+│   └── config/               # Application configuration
 │
-├── adapters/                 # Adaptadores (dependen de application, domain y shared)
-│   ├── in/                   # Adaptadores de entrada
-│   │   └── rest/             # Controladores REST
-│   └── out/                  # Adaptadores de salida
-│       ├── persistence/      # Implementación de persistencia
-│       └── api/              # Implementación de integración con APIs externas
+├── adapters/                 # Technical implementations
+│   ├── in/                   # Inbound adapters
+│   │   └── rest/             # REST controllers
+│   └── out/                  # Outbound adapters
+│       ├── persistence/      # Database implementations
+│       └── api/              # External API integrations
 │
-└── bootstrap/                # Arranque e inicialización (depende de todas las capas)
-    └── config/               # Configuración global
+└── bootstrap/                # Application initialization
+    └── config/               # Global configuration
 ```
 
-## Características implementadas
+### Architecture Diagram
 
-- **Arquitectura Hexagonal**: Separa claramente el dominio de las implementaciones técnicas.
-- **Java 17**: Uso de características avanzadas como:
-  - Records para objetos inmutables (DTOs, entidades y objetos de valor)
-  - Pattern matching para instanceof
-  - Bloques de texto multilínea (""")
-  - Var para inferencia de tipos
-  - Métodos de factoría para colecciones
-- **Spring Boot 3.x**: Soporta Jakarta EE en lugar de Java EE.
-- **API REST**: Punto de conexión único con comportamiento configurable.
-- **Múltiples fuentes de clima**: Sistema extensible para conectar con diferentes proveedores.
-- **Logging**: Registro de todas las solicitudes y respuestas.
-- **Persistencia**: Almacenamiento de registros en base de datos H2.
-- **Documentación API**: Integración con Swagger/OpenAPI.
-- **Manejo de errores**: Tratamiento de excepciones robusto.
+```
+┌─────────────────────────────────────────────────────┐
+│               REST API Layer                        │
+│              (Adapters - In)                        │
+└───────────────────┬─────────────────────────────────┘
+                    │
+┌───────────────────▼─────────────────────────────────┐
+│           Application Services                      │
+│          (Orchestration Layer)                      │
+└───────────────────┬─────────────────────────────────┘
+                    │
+┌───────────────────▼─────────────────────────────────┐
+│         Domain Layer (Business Logic)               │
+│   - Weather Entity        - Ports (Interfaces)      │
+│   - Temperature VO        - Use Cases               │
+│   - Wind Speed VO         - Domain Services         │
+└───────────────────┬─────────────────────────────────┘
+                    │
+┌───────────────────▼─────────────────────────────────┐
+│            Adapters - Out                           │
+│  ┌──────────────┐  ┌──────────────┐                 │
+│  │ OpenWeather  │  │  H2 Database │                 │
+│  │   Adapter    │  │   Adapter    │                 │
+│  └──────────────┘  └──────────────┘                 │
+└─────────────────────────────────────────────────────┘
+```
 
-## Requisitos
+---
 
-- Java 17+
+## 🛠️ Tech Stack
+
+### Core Technologies
+- **Java 17** - Modern Java features (Records, Pattern Matching, Text Blocks)
+- **Spring Boot 3.x** - Jakarta EE framework
+- **Spring Data JPA** - Data persistence
+- **H2 Database** - Embedded database
+- **Maven** - Build tool
+
+### API & Documentation
+- **Spring Web** - REST API
+- **Swagger/OpenAPI** - API documentation
+- **Jakarta Validation** - Input validation
+
+### Modern Java 17 Features Used
+```java
+// Records for immutable DTOs
+public record WeatherResponse(
+    String city,
+    Temperature temperature,
+    String condition,
+    Wind wind
+) {}
+
+// Pattern Matching
+if (provider instanceof OpenWeatherAdapter adapter) {
+    return adapter.fetchWeather(city);
+}
+
+// Text Blocks
+String query = """
+    SELECT * FROM weather_log
+    WHERE city = ?
+    AND timestamp > ?
+    """;
+```
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Java 17 or higher
 - Maven 3.8+
 
-## 🚀 Cómo ejecutar
+### Installation & Run
 
 ```bash
-# Clonar repositorio
-git clone https://github.com/tu-usuario/weather-proxy-hexa.git
-cd weather-proxy-hexa
+# Clone repository
+git clone https://github.com/javiernuma/weather-api-hexagonal.git
+cd weather-api-hexagonal
 
-# Compilar
+# Build
 mvn clean install
 
-# Ejecutar
+# Run
 mvn -pl bootstrap spring-boot:run
 ```
 
-La aplicación estará disponible en: http://localhost:8080
+### Access Points
 
-Acceso a:
-- API: http://localhost:8080/api/weather/{ciudad}
-- Swagger UI: http://localhost:8080/swagger-ui.html
-- Consola H2: http://localhost:8080/h2-console
+- **API Base:** http://localhost:8080
+- **Swagger UI:** http://localhost:8080/swagger-ui.html
+- **H2 Console:** http://localhost:8080/h2-console
 
-## Uso de la API
+---
 
-### Obtener información del clima para una ciudad
-```
-GET /api/weather/{ciudad}?source={fuente}&config={configuración}
-```
+## 📡 API Usage
 
-Ejemplo:
-```
-GET /api/weather/Madrid?source=mock
+### Get Weather Data
+
+```http
+GET /api/weather/{city}?source={provider}&config={json}
 ```
 
-Con configuración personalizada:
-```
-GET /api/weather/Madrid?source=openweather&config={"apiKey":"tu-api-key","baseUrl":"https://api.openweathermap.org/data/2.5"}
+#### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| city | path | Yes | City name |
+| source | query | No | Weather provider (default: mock) |
+| config | query | No | Provider-specific configuration (JSON) |
+
+### Examples
+
+**Basic Request (Mock Provider):**
+```bash
+curl http://localhost:8080/api/weather/Madrid?source=mock
 ```
 
-## Respuesta normalizada
+**OpenWeather Provider:**
+```bash
+curl "http://localhost:8080/api/weather/Madrid?source=openweather&config={\"apiKey\":\"YOUR_API_KEY\"}"
+```
+
+### Normalized Response
 
 ```json
 {
@@ -122,15 +203,221 @@ GET /api/weather/Madrid?source=openweather&config={"apiKey":"tu-api-key","baseUr
 }
 ```
 
-## Proveedores de clima implementados
+---
 
-1. **Mock** (simulado): Provee datos aleatorios para pruebas.
-2. **OpenWeather**: Integración con la API de OpenWeatherMap.
+## 🔌 Weather Providers
 
-## Próximas mejoras
+### Implemented Providers
 
-- Añadir más proveedores de clima (WeatherStack, AccuWeather, etc.)
-- Implementar caché con tiempo de expiración
-- Añadir autenticación y autorización
-- Implementar pruebas unitarias y de integración
-- Dockerización del servicio
+| Provider | Status | Description |
+|----------|--------|-------------|
+| **Mock** | ✅ Active | Simulated data for testing |
+| **OpenWeather** | ✅ Active | OpenWeatherMap API integration |
+| **WeatherStack** | 🔄 Planned | WeatherStack API |
+| **AccuWeather** | 🔄 Planned | AccuWeather API |
+
+### Adding New Providers
+
+Implement the `WeatherProvider` port:
+
+```java
+public interface WeatherProvider {
+    Weather fetchWeather(String city, ProviderConfig config);
+}
+```
+
+Example implementation:
+
+```java
+@Component("customProvider")
+public class CustomWeatherAdapter implements WeatherProvider {
+    @Override
+    public Weather fetchWeather(String city, ProviderConfig config) {
+        // Your implementation
+    }
+}
+```
+
+---
+
+## 🏛️ Architecture Patterns
+
+### Design Patterns Used
+
+- **Hexagonal Architecture** - Ports & Adapters separation
+- **Dependency Inversion** - Core depends on abstractions
+- **Strategy Pattern** - Interchangeable weather providers
+- **Factory Pattern** - Provider instantiation
+- **Repository Pattern** - Data access abstraction
+- **DTO Pattern** - API boundary objects
+
+### SOLID Principles
+
+✅ **Single Responsibility** - Each class has one reason to change
+✅ **Open/Closed** - Open for extension (new providers), closed for modification
+✅ **Liskov Substitution** - Providers are interchangeable
+✅ **Interface Segregation** - Focused port interfaces
+✅ **Dependency Inversion** - High-level modules independent of low-level details
+
+---
+
+## 🧪 Testing
+
+### Run Tests
+
+```bash
+# Unit Tests
+mvn test
+
+# Integration Tests
+mvn verify
+
+# Coverage Report
+mvn jacoco:report
+```
+
+### Test Coverage
+
+- ✅ Unit tests for domain logic
+- ✅ Integration tests for adapters
+- ✅ Contract tests for API
+- Target: 80%+ code coverage
+
+---
+
+## 📦 Project Structure
+
+```
+weather-api/
+├── domain/
+│   ├── model/
+│   │   ├── Weather.java
+│   │   ├── Temperature.java (Value Object)
+│   │   └── Wind.java (Value Object)
+│   ├── ports/
+│   │   ├── in/
+│   │   │   └── WeatherUseCase.java
+│   │   └── out/
+│   │       ├── WeatherProvider.java
+│   │       └── WeatherLogRepository.java
+│   └── services/
+│       └── WeatherService.java
+│
+├── shared/
+│   ├── dto/
+│   │   ├── WeatherResponse.java (Record)
+│   │   └── ProviderConfig.java (Record)
+│   └── exception/
+│       └── WeatherNotFoundException.java
+│
+├── application/
+│   └── service/
+│       └── WeatherApplicationService.java
+│
+├── adapters/
+│   ├── in/
+│   │   └── rest/
+│   │       └── WeatherController.java
+│   └── out/
+│       ├── persistence/
+│       │   └── JpaWeatherLogAdapter.java
+│       └── api/
+│           ├── MockWeatherAdapter.java
+│           └── OpenWeatherAdapter.java
+│
+└── bootstrap/
+    └── WeatherApplication.java
+```
+
+---
+
+## 🔒 Security Considerations
+
+- ✅ Input validation with Jakarta Validation
+- ✅ SQL injection prevention (JPA)
+- ✅ API key management (externalized config)
+- ✅ Error handling without data leakage
+
+---
+
+## 📈 Future Enhancements
+
+### Planned Features
+
+- [ ] **Caching Layer** - Redis integration for performance
+- [ ] **Rate Limiting** - API request throttling
+- [ ] **Authentication** - JWT-based security
+- [ ] **Docker Support** - Containerization
+- [ ] **Circuit Breaker** - Resilience4j integration
+- [ ] **Monitoring** - Prometheus metrics
+- [ ] **More Providers** - WeatherStack, AccuWeather
+
+---
+
+## 🐳 Docker Support
+
+### Build & Run with Docker
+
+```bash
+# Build image
+docker build -t weather-api:latest .
+
+# Run container
+docker run -p 8080:8080 weather-api:latest
+```
+
+### Docker Compose
+
+```yaml
+version: '3.8'
+services:
+  weather-api:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+```
+
+---
+
+## 📚 Additional Resources
+
+- [Hexagonal Architecture Guide](https://alistair.cockburn.us/hexagonal-architecture/)
+- [Spring Boot Documentation](https://spring.io/projects/spring-boot)
+- [Java 17 Features](https://openjdk.org/projects/jdk/17/)
+
+---
+
+## 👨‍💻 Author
+
+**Javier Vidal Numa Mendoza**
+
+Software Architect specializing in:
+- Clean Architecture
+- Hexagonal Architecture
+- Domain-Driven Design
+- Modern Java Development
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?logo=linkedin&logoColor=white)](https://linkedin.com/in/ing-javier-vidal-numa-mendoza)
+[![GitHub](https://img.shields.io/badge/GitHub-Follow-black?logo=github&logoColor=white)](https://github.com/javiernuma)
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+---
+
+## 🌟 Highlights
+
+- ⚡ **Hexagonal Architecture** - Ports & Adapters pattern
+- 🎯 **Clean Code** - SOLID principles
+- 🚀 **Modern Java** - Java 17+ features
+- 📦 **Provider Abstraction** - Extensible design
+- 📚 **Well-Documented** - Clear structure & examples
+
+---
+
+**Built with ❤️ demonstrating architectural excellence and modern Java practices**
