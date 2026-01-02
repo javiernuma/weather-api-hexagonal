@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  weather-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: weather-api
+    ports:
+      - "8080:8080"
+    environment:
+      # Spring profiles
+      - SPRING_PROFILES_ACTIVE=docker
+
+      # Database configuration (if using PostgreSQL instead of H2)
+      # - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/weatherdb
+      # - SPRING_DATASOURCE_USERNAME=weather
+      # - SPRING_DATASOURCE_PASSWORD=weatherpass
+
+      # Application settings
+      - SERVER_PORT=8080
+      - LOGGING_LEVEL_ROOT=INFO
+      - LOGGING_LEVEL_COM_WEATHER=DEBUG
+
+      # Weather provider API keys (configure these)
+      - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY:-your_api_key_here}
+      - WEATHERSTACK_API_KEY=${WEATHERSTACK_API_KEY:-your_api_key_here}
+
+    networks:
+      - weather-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    volumes:
+      # Mount logs directory (optional)
+      - ./logs:/app/logs
+
+  # Optional: PostgreSQL database (if not using H2)
+  # postgres:
+  #   image: postgres:15-alpine
+  #   container_name: weather-postgres
+  #   environment:
+  #     - POSTGRES_DB=weatherdb
+  #     - POSTGRES_USER=weather
+  #     - POSTGRES_PASSWORD=weatherpass
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres-data:/var/lib/postgresql/data
+  #   networks:
+  #     - weather-network
+  #   restart: unless-stopped
+
+  # Optional: Redis cache
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: weather-redis
+  #   ports:
+  #     - "6379:6379"
+  #   networks:
+  #     - weather-network
+  #   restart: unless-stopped
+  #   command: redis-server --appendonly yes
+  #   volumes:
+  #     - redis-data:/data
+
+networks:
+  weather-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  redis-data:
