@@ -1,18 +1,15 @@
-# ☁️ Weather API - Hexagonal Architecture Showcase
+# ☁️ Weather API - Hexagonal Architecture
 
-> Production-ready weather aggregation service demonstrating Hexagonal Architecture 
-> (Ports & Adapters), Clean Architecture principles, and modern Java 17+ features.
+> Production-ready weather aggregation service demonstrating Hexagonal Architecture (Ports & Adapters), Clean Architecture principles, and modern Java 17+ features.
 
-[![Java](https://img.shields.io/badge/Java-17-red?logo=openjdk&logoColor=white)]
-[![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x-green?logo=spring&logoColor=white)]
-[![Hexagonal](https://img.shields.io/badge/Architecture-Hexagonal-blue)]
-[![License](https://img.shields.io/badge/License-MIT-yellow)]
+[![Java](https://img.shields.io/badge/Java-17-red?logo=openjdk&logoColor=white)](https://openjdk.org/projects/jdk/17/)
+[![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x-green?logo=spring&logoColor=white)](https://spring.io/projects/spring-boot)
+[![Hexagonal](https://img.shields.io/badge/Architecture-Hexagonal-blue)](https://alistair.cockburn.us/hexagonal-architecture/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
 
 ## 🎯 Overview
 
-Enterprise-grade weather API service that aggregates data from multiple weather 
-providers through a clean, unified interface. Built to demonstrate architectural 
-patterns and best practices in modern Java development.
+Enterprise-grade weather API service that aggregates data from multiple weather providers through a clean, unified interface. Built to demonstrate architectural patterns and best practices in modern Java development.
 
 ### Key Features
 
@@ -21,6 +18,7 @@ patterns and best practices in modern Java development.
 - ✅ **Normalized API** - Consistent response format regardless of provider
 - ✅ **Modern Java 17+** - Records, Pattern Matching, Text Blocks
 - ✅ **Spring Boot 3.x** - Jakarta EE, native compilation ready
+- ✅ **Docker Support** - Multi-stage optimized containers
 - ✅ **API Documentation** - Swagger/OpenAPI integration
 - ✅ **Request Logging** - Complete audit trail of API calls
 
@@ -32,7 +30,6 @@ patterns and best practices in modern Java development.
 
 ```
 weather-api/
-│
 ├── domain/                   # Core business logic (zero external dependencies)
 │   ├── model/                # Entities & Value Objects
 │   ├── ports/                # Interface contracts
@@ -49,9 +46,8 @@ weather-api/
 │   └── config/               # Application configuration
 │
 ├── adapters/                 # Technical implementations
-│   ├── in/                   # Inbound adapters
-│   │   └── rest/             # REST controllers
-│   └── out/                  # Outbound adapters
+│   ├── in/rest/              # REST controllers
+│   └── out/                  # External integrations
 │       ├── persistence/      # Database implementations
 │       └── api/              # External API integrations
 │
@@ -104,6 +100,11 @@ weather-api/
 - **Swagger/OpenAPI** - API documentation
 - **Jakarta Validation** - Input validation
 
+### DevOps
+- **Docker** - Containerization
+- **Docker Compose** - Multi-container orchestration
+- **Makefile** - Build automation
+
 ### Modern Java 17 Features Used
 ```java
 // Records for immutable DTOs
@@ -135,16 +136,30 @@ String query = """
 
 - Java 17 or higher
 - Maven 3.8+
+- Docker & Docker Compose (optional)
 
 ### Installation & Run
 
+#### Option 1: Using Docker (Recommended)
+
 ```bash
 # Clone repository
-git clone https://github.com/javiernuma/weather-api-hexagonal.git
-cd weather-api-hexagonal
+git clone https://github.com/javiernuma/weater-proxy.git
+cd weater-proxy
 
+# Build and run with Docker
+docker-compose up --build
+
+# Or use Makefile
+make docker-build
+make docker-run
+```
+
+#### Option 2: Using Maven
+
+```bash
 # Build
-mvn clean install
+mvn clean package
 
 # Run
 mvn -pl bootstrap spring-boot:run
@@ -155,6 +170,7 @@ mvn -pl bootstrap spring-boot:run
 - **API Base:** http://localhost:8080
 - **Swagger UI:** http://localhost:8080/swagger-ui.html
 - **H2 Console:** http://localhost:8080/h2-console
+- **Health Check:** http://localhost:8080/actuator/health
 
 ---
 
@@ -184,6 +200,11 @@ curl http://localhost:8080/api/weather/Madrid?source=mock
 **OpenWeather Provider:**
 ```bash
 curl "http://localhost:8080/api/weather/Madrid?source=openweather&config={\"apiKey\":\"YOUR_API_KEY\"}"
+```
+
+**Using Makefile:**
+```bash
+make api-test
 ```
 
 ### Normalized Response
@@ -240,6 +261,47 @@ public class CustomWeatherAdapter implements WeatherProvider {
 
 ---
 
+## 🐳 Docker Usage
+
+### Using Makefile
+
+```bash
+make docker-build    # Build Docker image
+make docker-run      # Start containers
+make docker-logs     # View logs
+make docker-stop     # Stop containers
+make docker-clean    # Remove everything
+```
+
+### Using Docker Compose
+
+```bash
+# Build and start
+docker-compose up --build
+
+# Start in background
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop
+docker-compose down
+```
+
+### Environment Variables
+
+Create `.env` file:
+
+```env
+SPRING_PROFILES_ACTIVE=docker
+OPENWEATHER_API_KEY=your_api_key_here
+OPENWEATHER_ENABLED=true
+LOGGING_LEVEL_ROOT=INFO
+```
+
+---
+
 ## 🏛️ Architecture Patterns
 
 ### Design Patterns Used
@@ -253,131 +315,61 @@ public class CustomWeatherAdapter implements WeatherProvider {
 
 ### SOLID Principles
 
-✅ **Single Responsibility** - Each class has one reason to change
-✅ **Open/Closed** - Open for extension (new providers), closed for modification
-✅ **Liskov Substitution** - Providers are interchangeable
-✅ **Interface Segregation** - Focused port interfaces
+✅ **Single Responsibility** - Each class has one job  
+✅ **Open/Closed** - Open for extension (new providers), closed for modification  
+✅ **Liskov Substitution** - Providers are interchangeable  
+✅ **Interface Segregation** - Focused port interfaces  
 ✅ **Dependency Inversion** - High-level modules independent of low-level details
 
 ---
 
-## 🧪 Testing
+## 📦 Build Commands
 
-### Run Tests
+### Using Makefile
 
 ```bash
-# Unit Tests
-mvn test
-
-# Integration Tests
-mvn verify
-
-# Coverage Report
-mvn jacoco:report
+make help           # Show all commands
+make build          # Build project
+make test           # Run tests
+make coverage       # Generate coverage report
+make run            # Run locally
+make verify         # Full verification
+make swagger        # Open Swagger UI
+make h2-console     # Open H2 Console
 ```
 
-### Test Coverage
+### Using Maven
 
-- ✅ Unit tests for domain logic
-- ✅ Integration tests for adapters
-- ✅ Contract tests for API
-- Target: 80%+ code coverage
-
----
-
-## 📦 Project Structure
-
-```
-weather-api/
-├── domain/
-│   ├── model/
-│   │   ├── Weather.java
-│   │   ├── Temperature.java (Value Object)
-│   │   └── Wind.java (Value Object)
-│   ├── ports/
-│   │   ├── in/
-│   │   │   └── WeatherUseCase.java
-│   │   └── out/
-│   │       ├── WeatherProvider.java
-│   │       └── WeatherLogRepository.java
-│   └── services/
-│       └── WeatherService.java
-│
-├── shared/
-│   ├── dto/
-│   │   ├── WeatherResponse.java (Record)
-│   │   └── ProviderConfig.java (Record)
-│   └── exception/
-│       └── WeatherNotFoundException.java
-│
-├── application/
-│   └── service/
-│       └── WeatherApplicationService.java
-│
-├── adapters/
-│   ├── in/
-│   │   └── rest/
-│   │       └── WeatherController.java
-│   └── out/
-│       ├── persistence/
-│       │   └── JpaWeatherLogAdapter.java
-│       └── api/
-│           ├── MockWeatherAdapter.java
-│           └── OpenWeatherAdapter.java
-│
-└── bootstrap/
-    └── WeatherApplication.java
+```bash
+mvn clean package   # Build
+mvn test           # Run tests
+mvn verify         # Integration tests
+mvn jacoco:report  # Coverage report
 ```
 
 ---
 
-## 🔒 Security Considerations
+## 🔒 Security Features
 
 - ✅ Input validation with Jakarta Validation
 - ✅ SQL injection prevention (JPA)
 - ✅ API key management (externalized config)
+- ✅ Docker non-root user
 - ✅ Error handling without data leakage
 
 ---
 
-## 📈 Future Enhancements
+## 📈 Roadmap
 
 ### Planned Features
 
+- [ ] **Comprehensive Testing** - Unit, integration, and contract tests
 - [ ] **Caching Layer** - Redis integration for performance
 - [ ] **Rate Limiting** - API request throttling
 - [ ] **Authentication** - JWT-based security
-- [ ] **Docker Support** - Containerization
 - [ ] **Circuit Breaker** - Resilience4j integration
 - [ ] **Monitoring** - Prometheus metrics
 - [ ] **More Providers** - WeatherStack, AccuWeather
-
----
-
-## 🐳 Docker Support
-
-### Build & Run with Docker
-
-```bash
-# Build image
-docker build -t weather-api:latest .
-
-# Run container
-docker run -p 8080:8080 weather-api:latest
-```
-
-### Docker Compose
-
-```yaml
-version: '3.8'
-services:
-  weather-api:
-    build: .
-    ports:
-      - "8080:8080"
-    environment:
-      - SPRING_PROFILES_ACTIVE=prod
-```
 
 ---
 
@@ -386,6 +378,7 @@ services:
 - [Hexagonal Architecture Guide](https://alistair.cockburn.us/hexagonal-architecture/)
 - [Spring Boot Documentation](https://spring.io/projects/spring-boot)
 - [Java 17 Features](https://openjdk.org/projects/jdk/17/)
+- [Docker Best Practices](https://docs.docker.com/develop/dev-best-practices/)
 
 ---
 
@@ -394,13 +387,15 @@ services:
 **Javier Vidal Numa Mendoza**
 
 Software Architect specializing in:
-- Clean Architecture
-- Hexagonal Architecture
+- Clean Architecture & Hexagonal Architecture
 - Domain-Driven Design
+- Event-Driven Systems
 - Modern Java Development
+- Cloud-Native Applications
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?logo=linkedin&logoColor=white)](https://linkedin.com/in/ing-javier-vidal-numa-mendoza)
 [![GitHub](https://img.shields.io/badge/GitHub-Follow-black?logo=github&logoColor=white)](https://github.com/javiernuma)
+[![Email](https://img.shields.io/badge/Email-Contact-red?logo=gmail&logoColor=white)](mailto:ing.javiernuma@gmail.com)
 
 ---
 
@@ -416,6 +411,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - 🎯 **Clean Code** - SOLID principles
 - 🚀 **Modern Java** - Java 17+ features
 - 📦 **Provider Abstraction** - Extensible design
+- 🐳 **Docker Ready** - Production deployment
 - 📚 **Well-Documented** - Clear structure & examples
 
 ---
